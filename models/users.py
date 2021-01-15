@@ -1,4 +1,6 @@
+from models.profiles import ProfileModel #Importing the class named ProfileModel from profile.py - Which is in the models directory 
 from app import db
+from models.programs import ProgramModel #Importing the class named ProfileModel from profile.py - Which is in the models directory 
 
 from passlib.hash import pbkdf2_sha256 as sha256
 
@@ -14,6 +16,8 @@ class UserModel(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(20), nullable=False)
+    Profile = db.relationship("ProfileModel", backref="user", lazy="dynamic")
+    Program = db.relationship("ProgramModel", backref="user", lazy="dynamic")
 
     """
     Save user details in Database

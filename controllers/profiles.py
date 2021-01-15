@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.profiles import ProfileModel
 
+
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -21,18 +22,23 @@ parser.add_argument('userId', required=False)
 class NewProfile(Resource):
   
     # @jwt_required
+    # POST /profiles
+    # Create route
     def post(self):
 
+        # get params from the request
         data = parser.parse_args()
         fullName = data['fullName']
         user_id = data['userId']
 
+        # create model instance with the params
         new_profile = ProfileModel(
             full_name=fullName,
             user_id=user_id
         )
 
         try:
+            # save model instance to db
             new_profile.save_to_db()
             return {'message': f'Profile created'}
         

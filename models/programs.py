@@ -14,7 +14,7 @@ class ProgramModel(db.Model):
     created_on = db.Column(db.DateTime, default=datetime.datetime.now())
     products = db.relationship('ProductModel', secondary = 'produto_program')
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('UserModel')
+    #user = db.relationship('UserModel')
 
     def save_to_db(self):
         db.session.add(self)

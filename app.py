@@ -75,6 +75,9 @@ api.add_resource(controllers.profiles.DeleteProfile, '/profiles/<id_profile>')
 # Products
 api.add_resource(controllers.products.NewProduct, '/products')
 api.add_resource(controllers.products.AllProducts, '/products')
+api.add_resource(controllers.products.UpdateProduct, '/products/<id_product>')
+api.add_resource(controllers.products.DeleteProduct, '/products/<id_product>')
+
 
 # Programs
 api.add_resource(controllers.programs.NewProgram, '/programs')
