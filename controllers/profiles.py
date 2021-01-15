@@ -64,8 +64,6 @@ class UpdateProfile(Resource):
         data = parser.parse_args()
         id = data['id']
         fullName = data['fullName']
-        print(id)
-        print(fullName)
 
         ProfileModel.put(self, id, fullName)
         return {'message': f'Profile updated'}        

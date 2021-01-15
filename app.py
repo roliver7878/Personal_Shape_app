@@ -82,3 +82,5 @@ api.add_resource(controllers.products.DeleteProduct, '/products/<id_product>')
 # Programs
 api.add_resource(controllers.programs.NewProgram, '/programs')
 api.add_resource(controllers.programs.AllPrograms, '/programs')
+api.add_resource(controllers.programs.UpdateProgram, '/programs')
+api.add_resource(controllers.programs.DeleteProgram, '/programs/<id_program>')

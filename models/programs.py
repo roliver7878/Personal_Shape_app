@@ -26,11 +26,17 @@ class ProgramModel(db.Model):
         def to_json(program):
             return {
                 'name': program.name,
-                'start_date': program.start_date,
-                'end_date': program.end_date
+                'start_date': str(program.start_date),
+                'end_date': str(program.end_date),
+                'user': program.user_id
             }
         return {'products': list(map(lambda program: to_json(program), ProgramModel.query.all()))}
-
+    
+    @classmethod
+    def delete(self, id_program):
+        program = ProgramModel.query.filter_by(id=id_program).one()
+        db.session.delete(program)
+        db.session.commit()
 
     @classmethod
     def delete_all(cls):
@@ -42,3 +48,11 @@ class ProgramModel(db.Model):
         
         except:
             return {'message': 'Something went wrong'}
+
+    def put(self, id_program, name, start_date, end_date):
+        program = ProgramModel.query.filter_by(id=id_program).one()
+        program.name = name
+        program.start_date = start_date
+        program.end_date = end_date
+        db.session.add(program)
+        db.session.commit() 

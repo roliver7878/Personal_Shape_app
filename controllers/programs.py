@@ -14,28 +14,31 @@ from flask_jwt_extended import (
 import pdb
 
 parser = reqparse.RequestParser()
+parser.add_argument('id', required=False)
 parser.add_argument('name', required=False)
 parser.add_argument('start_date', required=False)
 parser.add_argument('end_date', required=False)
+parser.add_argument('user_id', required=False)
 
 # C - Create
 class NewProgram(Resource):
   
     # @jwt_required
+    # IT WORKS!!!
     def post(self):
 
         data = parser.parse_args()
         name = data['name']
-        start_date = data['start_date'],
+        start_date = data['start_date']
         end_date = data['end_date']
+        user_id = data['user_id']
 
         # create model instance with the params
         new_program = ProgramModel(
             name=name,
-            start_date=start_date
-            end_date=end_date
-
-            
+            start_date=start_date,
+            end_date=end_date,
+            user_id=user_id
         )
 
         try:
@@ -54,9 +57,9 @@ class AllPrograms(Resource):
 
 class DeleteProgram(Resource):
 
-def delete(self, id_program):
-    ProgramModel.delete(id_program)
-    return {'message': f'Program deleted'}
+    def delete(self, id_program):
+        ProgramModel.delete(id_program)
+        return {'message': f'Program deleted'}
 
 
 class UpdateProgram(Resource):
@@ -65,10 +68,9 @@ class UpdateProgram(Resource):
         data = parser.parse_args()
         id = data['id']
         name = data['name']
-        start_Date = data['startDate']
-        end_date = data['endDate']
+        start_date = data['start_date']
+        end_date = data['end_date']
 
-        # get params from the request
-        data = parser.parse_args()
-        fullName = data['fullName']
-        user_id = data['userId']
+        ProgramModel.put(self, id, name, start_date, end_date)
+        return {'message': f'Profile updated'} 
+
