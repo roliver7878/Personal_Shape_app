@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.users import UserModel, RevokedTokenModel
-
+from datetime import timedelta
 
 from flask_jwt_extended import (
     create_access_token,
@@ -11,6 +11,8 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_raw_jwt
 )
+
+
 
 import pdb
 
@@ -80,7 +82,7 @@ class UserLogin(Resource):
         if UserModel.verify_hash(data['password'], current_user.password):
             
             # generating access token and refresh token
-            access_token = create_access_token(identity=username)
+            access_token = create_access_token(identity=username, expires_delta=timedelta(days=1) )
             refresh_token = create_refresh_token(identity=username)
         
             return jsonify({
@@ -102,12 +104,13 @@ class UserLogoutAccess(Resource):
     
     @jwt_required
     def post(self):
-
+        
         jti = get_raw_jwt()['jti']
-    
+        
         try:
             # Revoking access token
             revoked_token = RevokedTokenModel(jti=jti)
+            
             revoked_token.add()
     
             return jsonify({'message': 'Access token has been revoked'})

@@ -18,6 +18,8 @@ class ProdutoProgram(db.Model):
        db.session.add(self)
        db.session.commit() 
 
+
+
 class ProductModel(db.Model):
 
     __tablename__ = 'products'
@@ -41,7 +43,22 @@ class ProductModel(db.Model):
                 'brand': product.brand
             }
         return {'products': list(map(lambda product: to_json(product), ProductModel.query.all()))}
-
+    
+    @classmethod
+    def delete(self, id_product):
+        product = ProductModel.query.filter_by(id=id_product).one()
+        db.session.delete(product)
+        db.session.commit()
+    
+    def put(self, id_product, name, brand):
+        product = ProductModel.query.filter_by(id=id_product).one()
+        if (name < 2 and brand < 2):
+            return False
+        product.name = name
+        product.brand = brand
+        db.session.add(product)
+        db.session.commit() 
+        return True
 
     @classmethod
     def delete_all(cls):

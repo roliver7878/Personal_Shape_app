@@ -51,8 +51,11 @@ class ProgramModel(db.Model):
 
     def put(self, id_program, name, start_date, end_date):
         program = ProgramModel.query.filter_by(id=id_program).one()
+        if (len(name) < 2):
+            return False
         program.name = name
         program.start_date = start_date
         program.end_date = end_date
         db.session.add(program)
         db.session.commit() 
+        return True

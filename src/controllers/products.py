@@ -1,6 +1,9 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.products import ProductModel
+from models.users import UserModel
+from Schemas.ProductSchema import product_schema, product_schemas
+import json
 
 from flask_jwt_extended import (
     create_access_token,
@@ -14,13 +17,16 @@ from flask_jwt_extended import (
 import pdb
 
 parser = reqparse.RequestParser()
+parser.add_argument('id', required=False)
 parser.add_argument('name', required=False)
 parser.add_argument('brand', required=False)
 
-# C - Create
 class NewProduct(Resource):
   
     # @jwt_required
+    # POST /profiles
+    # Create route
+
     def post(self):
 
         # get params from the request
@@ -28,46 +34,72 @@ class NewProduct(Resource):
         name = data['name']
         brand = data['brand']
 
-        # make a new model instance with the params
+
+        # create model instance with the params
         new_product = ProductModel(
             name=name,
             brand=brand
         )
 
+
         try:
             # save model instance to db
             new_product.save_to_db()
-            return {'message': f'Product created'}
+            return make_response(jsonify({
+            'message': 'new product created'
+        }), 200)
         
         except:
-            return jsonify({'message': 'Something went wrong'}), 500
+            return make_response(jsonify({
+            'message': 'something went wrong'
+        }), 500)
 
-# R - Read
 class AllProducts(Resource):
     
     # @jwt_required
     def get(self):
-        return ProductModel.return_all()
+        all_products = ProductModel.query.all()
+        return jsonify(product_schemas.dump(all_products))
+        # return ProductModel.return_all()
 
-# D - Delete
+
 class DeleteProduct(Resource):
     
     def delete(self, id_product):
-        ProductModel.delete(id_product)
+
+        product_model = ProductModel.query.filter_by(id=id_product).first()
+
+        if not product_model:
+            return make_response(jsonify({
+            'message': f'No product with id {id_product} exists'
+        }), 500)
+
+        ProductModel.add(id_product)
         return {'message': f'Product deleted'}
 
-# U - Update
 class UpdateProduct(Resource):
     
     def put(self, id_product):
-        # get product from database
-        product = ProductModel.query.get(id_product)
-
-        # update fields in the product
         data = parser.parse_args()
-        product.name = data['name']
-        product.brand = data['brand']
+        name = data['name']
+        brand = data['brand']
 
-        # save product to db
-        product.save_to_db()
-        return {'message': f'Product updated'}        
+        product_model_object = ProductModel.query.filter_by(id=id_product).first()
+
+        if not product_model_object:
+            return make_response(jsonify({
+            'message': f'No product with id {id_product} exists'
+        }), 500)
+
+        # product_model_object.update(product_fields)
+
+        valid_data = ProductModel.put(self, id_product, name, brand)
+
+        if not valid_data:
+            return make_response(jsonify({
+                'message': f'Invalid data entered'
+            }), 500)       
+
+        return make_response(jsonify({
+            'message': f'Product with id {id_product} updated'
+        }), 200)       

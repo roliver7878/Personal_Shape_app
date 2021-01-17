@@ -103,8 +103,15 @@ class RevokedTokenModel(db.Model):
     """
     Checking that token is blacklisted
     """
+    from app import jwt
     @classmethod
     def is_jti_blacklisted(cls, jti):
     
         query = cls.query.filter_by(jti=jti).first()
         return bool(query)
+
+    blacklist = set()
+    @jwt.token_in_blacklist_loader
+    def check_if_token_in_blacklist(decrypted_token):
+        jti = decrypted_token['jti']
+        return jti in blacklist

@@ -10,7 +10,7 @@ class ProfileModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(50), nullable=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     #user = db.relationship('UserModel')
 
     def save_to_db(self):
@@ -37,6 +37,14 @@ class ProfileModel(db.Model):
 
     def put(self, id_profile, full_name):
         profile = ProfileModel.query.filter_by(id=id_profile).one()
+        if (len(full_name) < 2):
+            return False
         profile.full_name = full_name
         db.session.add(profile)
         db.session.commit() 
+        return True
+
+    @classmethod
+    def find_by_user_id(cls, user_id):
+        
+        return cls.query.filter_by(user_id=user_id).first() 

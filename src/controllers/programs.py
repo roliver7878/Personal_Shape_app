@@ -1,6 +1,8 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.programs import ProgramModel
+from models.users import UserModel
+
 
 from flask_jwt_extended import (
     create_access_token,
@@ -20,18 +22,36 @@ parser.add_argument('start_date', required=False)
 parser.add_argument('end_date', required=False)
 parser.add_argument('user_id', required=False)
 
-# C - Create
+
+
+
 class NewProgram(Resource):
   
     # @jwt_required
-    # IT WORKS!!!
+    # POST /profiles
+    # Create route
+    @jwt_required
     def post(self):
 
+        # get params from the request
         data = parser.parse_args()
         name = data['name']
         start_date = data['start_date']
         end_date = data['end_date']
-        user_id = data['user_id']
+
+        username = get_jwt_identity()
+
+        
+        current_user = UserModel.find_by_username(username)
+        user_id = current_user.id
+        program_model = ProgramModel.query.filter_by(user_id=user_id).first()
+        
+
+        if program_model:
+            return make_response(jsonify({
+            'message': f'profile for user {username} already exists'
+        }), 500)
+
 
         # create model instance with the params
         new_program = ProgramModel(
@@ -41,13 +61,18 @@ class NewProgram(Resource):
             user_id=user_id
         )
 
+
         try:
             # save model instance to db
             new_program.save_to_db()
-            return {'message': f'Program created'}
+            return make_response(jsonify({
+            'message': 'new program created'
+        }), 200)
         
         except:
-            return jsonify({'message': 'Something went wrong'}), 500
+            return make_response(jsonify({
+            'message': 'something went wrong'
+        }), 500)
 
 class AllPrograms(Resource):
     
@@ -55,22 +80,57 @@ class AllPrograms(Resource):
     def get(self):
         return ProgramModel.return_all()
 
-class DeleteProgram(Resource):
 
+class DeleteProgram(Resource):
+    
+    @jwt_required
     def delete(self, id_program):
+        username = get_jwt_identity()
+        current_user = UserModel.find_by_username(username)
+
+        if not current_user:
+            return make_response(jsonify({
+            'message': f'no user has that jwt'
+        }), 500)
+
+
+        user_id = current_user.id
+        program_model = ProgramModel.query.filter_by(id=id_program, user_id=user_id).first()
+
+        if not program_model:
+            return make_response(jsonify({
+            'message': f'user does not own profile with id {id}'
+        }), 500)
+
         ProgramModel.delete(id_program)
         return {'message': f'Program deleted'}
 
-
 class UpdateProgram(Resource):
     
-    def put(self):
+    @jwt_required
+    def put(self, id_program):
         data = parser.parse_args()
-        id = data['id']
         name = data['name']
         start_date = data['start_date']
         end_date = data['end_date']
 
-        ProgramModel.put(self, id, name, start_date, end_date)
-        return {'message': f'Profile updated'} 
+        username = get_jwt_identity()
+        current_user = UserModel.find_by_username(username)
 
+        if not current_user:
+            return make_response(jsonify({
+            'message': f'no user has that jwt'
+        }), 500)
+
+        user_id = current_user.id
+
+        program_model = ProgramModel.query.filter_by(id=id_program, user_id=user_id).first()
+
+        if not program_model:
+            return make_response(jsonify({
+            'message': f'user does not own program with id {id_program}'
+        }), 500)
+
+        
+        ProgramModel.put(self, id_program, name, start_date, end_date)
+        return {'message': f'Program updated'}        
