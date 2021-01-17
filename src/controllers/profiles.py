@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.profiles import ProfileModel
 from models.users import UserModel
+from sqlalchemy import func
 
 
 from flask_jwt_extended import (
@@ -22,9 +23,7 @@ parser.add_argument('userId', required=False)
 
 class NewProfile(Resource):
   
-    # @jwt_required
-    # POST /profiles
-    # Create route
+
     @jwt_required
     def post(self):
 
@@ -33,7 +32,6 @@ class NewProfile(Resource):
         fullName = data['fullName']
         username = get_jwt_identity()
 
-        
         current_user = UserModel.find_by_username(username)
         user_id = current_user.id
         profile_model = ProfileModel.query.filter_by(user_id=user_id).first()
@@ -69,6 +67,24 @@ class AllProfiles(Resource):
     # @jwt_required
     def get(self):
         return ProfileModel.return_all()
+
+
+class NamesAndProfiles(Resource):
+    
+    # @jwt_required
+    def get(self):
+
+        # SELECT u.username, COUNT(p.user_id) AS number_programs  FROM users u
+        # JOIN programs p ON (p.user_id = u.id) GROUP BY u.username;
+
+        query = ProfileModel.query.with_entities(
+        UserModel.username, func.count(ProfileModel.id).label(
+            'number_profiles')).select_from(UserModel).outerjoin(ProfileModel, 
+            ProfileModel.user_id == UserModel.id).group_by(UserModel.username)
+        records = []
+        for row in query:
+            records.append(row)
+        return jsonify(records)
 
 
 class DeleteProfile(Resource):
@@ -127,6 +143,3 @@ class UpdateProfile(Resource):
             return make_response(jsonify({
                 'message': f'Invalid data entered'
             }), 500)       
-
-
-        return {'message': f'Profile updated'}        

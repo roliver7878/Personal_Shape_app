@@ -2,7 +2,8 @@ from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
 from models.programs import ProgramModel
 from models.users import UserModel
-
+from Schemas.NameSchema import name_count_schemas
+from sqlalchemy import func
 
 from flask_jwt_extended import (
     create_access_token,
@@ -45,13 +46,6 @@ class NewProgram(Resource):
         current_user = UserModel.find_by_username(username)
         user_id = current_user.id
         program_model = ProgramModel.query.filter_by(user_id=user_id).first()
-        
-
-        if program_model:
-            return make_response(jsonify({
-            'message': f'profile for user {username} already exists'
-        }), 500)
-
 
         # create model instance with the params
         new_program = ProgramModel(
@@ -74,11 +68,30 @@ class NewProgram(Resource):
             'message': 'something went wrong'
         }), 500)
 
+
 class AllPrograms(Resource):
     
     # @jwt_required
     def get(self):
         return ProgramModel.return_all()
+
+
+class NamesAndPrograms(Resource):
+    
+    # @jwt_required
+    def get(self):
+
+        # SELECT u.username, COUNT(p.user_id) AS number_programs  FROM users u
+        # JOIN programs p ON (p.user_id = u.id) GROUP BY u.username;
+
+        query = ProgramModel.query.with_entities(
+        UserModel.username, func.count(ProgramModel.id).label(
+            'number_programs')).select_from(UserModel).outerjoin(ProgramModel, 
+            ProgramModel.user_id == UserModel.id).group_by(UserModel.username)
+        records = []
+        for row in query:
+            records.append(row)
+        return jsonify(records)
 
 
 class DeleteProgram(Resource):

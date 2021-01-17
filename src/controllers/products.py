@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import jsonify, make_response
-from models.products import ProductModel
+from models.products import ProductModel, ProdutoProgram
+from models.programs import ProgramModel
 from models.users import UserModel
 from Schemas.ProductSchema import product_schema, product_schemas
 import json
@@ -20,6 +21,9 @@ parser = reqparse.RequestParser()
 parser.add_argument('id', required=False)
 parser.add_argument('name', required=False)
 parser.add_argument('brand', required=False)
+parser.add_argument('product_id', required=False)
+parser.add_argument('program_id', required=False)
+
 
 class NewProduct(Resource):
   
@@ -33,7 +37,6 @@ class NewProduct(Resource):
         data = parser.parse_args()
         name = data['name']
         brand = data['brand']
-
 
         # create model instance with the params
         new_product = ProductModel(
@@ -51,7 +54,7 @@ class NewProduct(Resource):
         
         except:
             return make_response(jsonify({
-            'message': 'something went wrong'
+            'message': 'something went wrong. Check inputs are all valid and length greater than 2'
         }), 500)
 
 class AllProducts(Resource):
@@ -102,3 +105,65 @@ class UpdateProduct(Resource):
         return make_response(jsonify({
             'message': f'Product with id {id_product} updated'
         }), 200)       
+
+class JoinProdutoProgram(Resource):
+    
+    def post(self):
+
+        data = parser.parse_args()
+        program_id = data['program_id']
+        product_id = data['product_id']
+
+        # Check if product with product id does exist
+
+        product_model_object = ProductModel.query.filter_by(id=product_id).first()
+
+        if not product_model_object:
+            return make_response(jsonify({
+                'Message': f'Product with id {product_id} does not exist'
+            }), 500)       
+        
+
+        # Check if program with program id does exist
+
+        program_model_object = ProgramModel.query.filter_by(id=program_id).first()
+
+        if not program_model_object:
+            return make_response(jsonify({
+                'Message': f'Program with id {program_id} does not exist'
+            }), 500)       
+
+        # Check if program with program id and product with product id already have join record
+
+        produtoprogram_model_object = ProdutoProgram.query.filter_by(program_id=program_id, product_id=product_id).first()
+
+        if produtoprogram_model_object:
+            return make_response(jsonify({
+                'Message': f'Program with id {program_id} and product with id {product_id} join record already exists'
+            }), 500)
+
+
+        # create model instance with the params
+        new_produtoprogram_model_object = ProdutoProgram(
+            program_id=program_id,
+            product_id=product_id
+        )
+
+
+        try:
+            # save model instance to db
+            new_produtoprogram_model_object.save_to_db()
+            return make_response(jsonify({
+            'message': 'new product to program created'
+        }), 200)
+        
+        except:
+            return make_response(jsonify({
+            'message': 'something went wrong. Check that the product id and program id exist'
+        }), 500)
+
+class AllProdutoPrograms(Resource):
+    
+    # @jwt_required
+    def get(self):
+        return ProdutoProgram.return_all()

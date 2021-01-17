@@ -3,20 +3,32 @@ import datetime
 from passlib.hash import pbkdf2_sha256 as sha256
 
 class ProdutoProgram(db.Model):
-   __tablename__ = 'produto_program'
-   program_id = db.Column(
-      db.Integer, 
-      db.ForeignKey('programs.id'), 
-      primary_key = True)
+    __tablename__ = 'produto_program'
+    program_id = db.Column(
+    db.Integer, 
+    db.ForeignKey('programs.id'), 
+    primary_key = True)
 
-   product_id = db.Column(
-      db.Integer, 
-      db.ForeignKey('products.id'), 
-      primary_key = True)
+    product_id = db.Column(
+    db.Integer, 
+    db.ForeignKey('products.id'), 
+    primary_key = True)
 
-   def save_to_db(self):
-       db.session.add(self)
-       db.session.commit() 
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit() 
+
+    @classmethod
+    def return_all(cls):
+
+        def to_json(produtoprogram):
+            return {
+                'product_id': produtoprogram.product_id,
+                'program_id': produtoprogram.program_id
+            }
+        return {'product to programs': list(map(lambda produtoprogram: to_json(produtoprogram), ProdutoProgram.query.all()))}
+
+
 
 
 
@@ -31,8 +43,14 @@ class ProductModel(db.Model):
     programs = db.relationship('ProgramModel', secondary = 'produto_program')
 
     def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
+
+        if len(self.name) > 2 and len(self.brand) > 2:
+
+            db.session.add(self)
+            db.session.commit()
+        else:
+
+            raise Exception
 
     @classmethod
     def return_all(cls):

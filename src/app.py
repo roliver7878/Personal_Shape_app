@@ -76,18 +76,22 @@ api.add_resource(controllers.users.UserLogoutRefresh, '/logout/refresh')
 api.add_resource(controllers.users.TokenRefresh, '/token/refresh')
 api.add_resource(controllers.users.AllUsers, '/users')
 api.add_resource(controllers.users.SecretResource, '/secret')
+api.add_resource(controllers.users.DownloadData, '/downloaddata')
 
 # Profiles
 api.add_resource(controllers.profiles.NewProfile, '/profiles')
 api.add_resource(controllers.profiles.AllProfiles, '/profiles')
 api.add_resource(controllers.profiles.UpdateProfile, '/profiles/<id_profile>')
 api.add_resource(controllers.profiles.DeleteProfile, '/profiles/<id_profile>')
+api.add_resource(controllers.profiles.NamesAndProfiles, '/profiles/counts')
 
 # Products
 api.add_resource(controllers.products.NewProduct, '/products')
 api.add_resource(controllers.products.AllProducts, '/products')
 api.add_resource(controllers.products.UpdateProduct, '/products/<id_product>')
 api.add_resource(controllers.products.DeleteProduct, '/products/<id_product>')
+api.add_resource(controllers.products.JoinProdutoProgram, '/products/jointoprogram')
+api.add_resource(controllers.products.AllProdutoPrograms, '/products/allprodutoprograms')
 
 
 # Programs
@@ -95,4 +99,5 @@ api.add_resource(controllers.programs.NewProgram, '/programs')
 api.add_resource(controllers.programs.AllPrograms, '/programs')
 api.add_resource(controllers.programs.UpdateProgram, '/programs/<id_program>')
 api.add_resource(controllers.programs.DeleteProgram, '/programs/<id_program>')
+api.add_resource(controllers.programs.NamesAndPrograms, '/programs/counts')
 

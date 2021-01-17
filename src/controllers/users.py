@@ -178,3 +178,13 @@ class SecretResource(Resource):
     @jwt_required
     def get(self):
         return jsonify({'answer': 'You are accessing super secret blueprint'})
+
+class DownloadData(Resource):
+    """
+    DownloadData
+    """
+
+    def get(self):
+    
+        return UserModel.download_all_data()
+        
