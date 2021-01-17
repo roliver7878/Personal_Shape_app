@@ -59,8 +59,7 @@ class AllProducts(Resource):
     # @jwt_required
     def get(self):
         all_products = ProductModel.query.all()
-        return jsonify(product_schemas.dump(all_products))
-        # return ProductModel.return_all()
+        return ProductModel.return_all()
 
 
 class DeleteProduct(Resource):

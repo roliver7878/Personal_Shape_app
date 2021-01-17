@@ -82,7 +82,7 @@ class UserLogin(Resource):
         if UserModel.verify_hash(data['password'], current_user.password):
             
             # generating access token and refresh token
-            access_token = create_access_token(identity=username, expires_delta=timedelta(days=1) )
+            access_token = create_access_token(identity=username, expires_delta=timedelta(hours=2) )
             refresh_token = create_refresh_token(identity=username)
         
             return jsonify({

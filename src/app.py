@@ -4,7 +4,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
-
+from dotenv import load_dotenv
 
 
 
@@ -20,7 +20,7 @@ api = Api(app)
 
 
 # Application Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/authdb_dev'
+app.config.from_object("default_settings.app_config")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'ThisIsHardestThing'
 app.config['JWT_SECRET_KEY'] = 'Dude!WhyShouldYouEncryptIt'
